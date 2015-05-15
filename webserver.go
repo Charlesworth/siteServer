@@ -19,7 +19,8 @@ func main() {
 
 	router := httprouter.New()
 
-	router.GET("/index", testGlob)
+	router.GET("/Glob", testGlob)
+	router.GET("/Files", testFiles)
 
 	http.Handle("/", router)
 
@@ -27,15 +28,18 @@ func main() {
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
 
-func getTest(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+func testFiles(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 
 	mock := PageViews{10, 20, 30}
 
-	tmpl := template.Must(template.ParseFiles("tmpl/comments.html", "tmpl/foot.html")) //"tmpl/head.html", "tmpl/post.html", "tmpl/comments.html", "tmpl/foot.html"))
+	tmpl := template.Must(template.ParseFiles("tmpl/index.html", "tmpl/head.html"))
 
-	err := tmpl.Execute(w, mock)
+	//ExecuteTemplate writes the template to w, writing "indexPage" as the main as defined
+	//in index.html, and with a data interface
+	err := tmpl.ExecuteTemplate(w, "indexPage", mock)
 	if err != nil {
-		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 }
