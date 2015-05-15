@@ -21,6 +21,14 @@ func main() {
 
 	router.GET("/Glob", testGlob)
 	router.GET("/Files", testFiles)
+	//password := input args for password
+	//router.GET("/", handleIndex)
+	//router.GET("/contact", handleContact)
+	//router.GET("/projects", handleProjects)
+	//router.GET("/posts", handlePostsIndex)
+	//router.GET("/posts/*", handlePost)
+	//router.GET("/stats", handleStats)
+	//router.GET("/refresh/" + password, handleRefresh)
 
 	http.Handle("/", router)
 
