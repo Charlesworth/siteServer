@@ -63,9 +63,7 @@ func handleRefresh(w http.ResponseWriter, r *http.Request, params httprouter.Par
 		log.Fatal(err)
 	}
 
-	dir = dir + "/posts"
-
-	files, _ := ioutil.ReadDir(dir)
+	files, _ := ioutil.ReadDir(dir + "/posts")
 
 	for _, f := range files {
 		fmt.Fprintln(w, f.Name())
