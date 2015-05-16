@@ -30,7 +30,7 @@ func main() {
 	//router.GET("/posts", handlePostsIndex)
 	router.GET("/posts/:post", handlePost)
 	//router.GET("/stats", handleStats)
-	//router.GET("/refresh/" + password, handleRefresh)
+	router.GET("/refresh", handleRefresh)
 
 	http.Handle("/", router)
 
@@ -41,8 +41,9 @@ func main() {
 func handlePost(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 
 	mock := Post{"Test Post", 20}
+	//need to check if params.ByName("post") is in the list of posts and if not 404
 
-	tmpl := template.Must(template.ParseFiles("tmpl/wrapper.html", "tmpl/"+params.ByName("post")+".html"))
+	tmpl := template.Must(template.ParseFiles("tmpl/wrapper.html", "post/"+params.ByName("post")+".html"))
 
 	//ExecuteTemplate writes the template to w, writing "indexPage" as the main as defined
 	//in index.html, and with a data interface
@@ -51,6 +52,10 @@ func handlePost(w http.ResponseWriter, r *http.Request, params httprouter.Params
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+}
+
+func handleRefresh(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 
 }
 
