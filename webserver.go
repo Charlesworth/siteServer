@@ -28,7 +28,7 @@ func main() {
 	//router.GET("/contact", handleContact)
 	//router.GET("/projects", handleProjects)
 	//router.GET("/posts", handlePostsIndex)
-	//router.GET("/posts/*", handlePost)
+	router.GET("/posts/:post", handlePost)
 	//router.GET("/stats", handleStats)
 	//router.GET("/refresh/" + password, handleRefresh)
 
@@ -36,6 +36,22 @@ func main() {
 
 	log.Println("Listening...")
 	log.Fatal(http.ListenAndServe(":3000", nil))
+}
+
+func handlePost(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+
+	mock := Post{"Test Post", 20}
+
+	tmpl := template.Must(template.ParseFiles("tmpl/wrapper.html", "tmpl/"+params.ByName("post")+".html"))
+
+	//ExecuteTemplate writes the template to w, writing "indexPage" as the main as defined
+	//in index.html, and with a data interface
+	err := tmpl.ExecuteTemplate(w, "wrapper", mock)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 }
 
 func testFiles(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
