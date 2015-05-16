@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/julienschmidt/httprouter"
 	"html/template"
 	"log"
 	"net/http"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 type PageViews struct {
@@ -40,11 +41,11 @@ func testFiles(w http.ResponseWriter, r *http.Request, params httprouter.Params)
 
 	mock := PageViews{10, 20, 30}
 
-	tmpl := template.Must(template.ParseFiles("tmpl/index.html", "tmpl/head.html"))
+	tmpl := template.Must(template.ParseFiles("tmpl/wrapper.html", "tmpl/post.html"))
 
 	//ExecuteTemplate writes the template to w, writing "indexPage" as the main as defined
 	//in index.html, and with a data interface
-	err := tmpl.ExecuteTemplate(w, "indexPage", mock)
+	err := tmpl.ExecuteTemplate(w, "wrapper", mock)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
