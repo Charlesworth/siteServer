@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -56,7 +58,18 @@ func handlePost(w http.ResponseWriter, r *http.Request, params httprouter.Params
 }
 
 func handleRefresh(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	dir = dir + "/posts"
+
+	files, _ := ioutil.ReadDir(dir)
+
+	for _, f := range files {
+		fmt.Fprintln(w, f.Name())
+	}
 }
 
 func testFiles(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
