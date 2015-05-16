@@ -9,10 +9,11 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-type PageViews struct {
-	Index    int
-	Contact  int
-	Projects int
+//The Post struct is used to record information about each blog post
+//Each Post should be named using the post date
+type Post struct {
+	Title string
+	Views int
 }
 
 func main() {
@@ -39,7 +40,7 @@ func main() {
 
 func testFiles(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 
-	mock := PageViews{10, 20, 30}
+	mock := Post{"Test Post", 20}
 
 	tmpl := template.Must(template.ParseFiles("tmpl/wrapper.html", "tmpl/post.html"))
 
