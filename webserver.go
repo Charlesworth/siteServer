@@ -20,24 +20,24 @@ type Post struct {
 }
 
 func main() {
-	viewLib.ViewLibInit()
+	viewLib.Init()
 
 	fmt.Println("webserver started")
 
-	router := httprouter.New()
+	// router := httprouter.New()
+	//
+	// router.GET("/Glob", testGlob)
+	// router.GET("/Files", testFiles)
+	// //password := input args for password
+	// //router.GET("/", handleIndex)
+	// //router.GET("/contact", handleContact)
+	// //router.GET("/projects", handleProjects)
+	// //router.GET("/posts", handlePostsIndex)
+	// router.GET("/posts/:post", handlePost)
+	// //router.GET("/stats", handleStats)
+	// router.GET("/refresh", handleRefresh)
 
-	router.GET("/Glob", testGlob)
-	router.GET("/Files", testFiles)
-	//password := input args for password
-	//router.GET("/", handleIndex)
-	//router.GET("/contact", handleContact)
-	//router.GET("/projects", handleProjects)
-	//router.GET("/posts", handlePostsIndex)
-	router.GET("/posts/:post", handlePost)
-	//router.GET("/stats", handleStats)
-	router.GET("/refresh", handleRefresh)
-
-	http.Handle("/", router)
+	http.Handle("/", newRouter())
 
 	log.Println("Listening...")
 	log.Fatal(http.ListenAndServe(":3000", nil))
@@ -48,7 +48,7 @@ func handlePost(w http.ResponseWriter, r *http.Request, params httprouter.Params
 	mock := Post{"Test Post", 20}
 	//need to check if params.ByName("post") is in the list of posts and if not 404
 
-	tmpl := template.Must(template.ParseFiles("tmpl/wrapper.html", "post/"+params.ByName("post")+".html"))
+	tmpl := template.Must(template.ParseFiles("tmpl/wrapper.html", "posts/"+params.ByName("post")+".html"))
 
 	//ExecuteTemplate writes the template to w, writing "indexPage" as the main as defined
 	//in index.html, and with a data interface
@@ -99,4 +99,22 @@ func testGlob(w http.ResponseWriter, r *http.Request, params httprouter.Params) 
 		return
 	}
 
+}
+
+//newRouter returns a httprouter.Router complete with the routes
+func newRouter() *httprouter.Router {
+
+	router := httprouter.New()
+	router.GET("/Glob", testGlob)
+	router.GET("/Files", testFiles)
+	//password := input args for password
+	//router.GET("/", handleIndex)
+	//router.GET("/contact", handleContact)
+	//router.GET("/projects", handleProjects)
+	//router.GET("/posts", handlePostsIndex)
+	router.GET("/posts/:post", handlePost)
+	//router.GET("/stats", handleStats)
+	router.GET("/refresh", handleRefresh)
+
+	return router
 }
