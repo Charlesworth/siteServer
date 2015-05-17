@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/Charlesworth/viewsLib"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -19,6 +20,8 @@ type Post struct {
 }
 
 func main() {
+	viewLib.ViewLibInit()
+
 	fmt.Println("webserver started")
 
 	router := httprouter.New()
