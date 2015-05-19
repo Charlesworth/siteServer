@@ -12,7 +12,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-//The Post struct is used to record information about each blog post
+//Post struct is used to record information about each blog post
 //Each Post should be named using the post date
 type Post struct {
 	Title string
@@ -20,25 +20,10 @@ type Post struct {
 }
 
 func main() {
-	viewLib.Init()
 
 	fmt.Println("webserver started")
 
-	// router := httprouter.New()
-	//
-	// router.GET("/Glob", testGlob)
-	// router.GET("/Files", testFiles)
-	// //password := input args for password
-	// //router.GET("/", handleIndex)
-	// //router.GET("/contact", handleContact)
-	// //router.GET("/projects", handleProjects)
-	// //router.GET("/posts", handlePostsIndex)
-	// router.GET("/posts/:post", handlePost)
-	// //router.GET("/stats", handleStats)
-	// router.GET("/refresh", handleRefresh)
-
 	http.Handle("/", newRouter())
-
 	log.Println("Listening...")
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
@@ -48,29 +33,56 @@ func handlePost(w http.ResponseWriter, r *http.Request, params httprouter.Params
 	mock := Post{"Test Post", 20}
 	//need to check if params.ByName("post") is in the list of posts and if not 404
 
-	tmpl := template.Must(template.ParseFiles("tmpl/wrapper.html", "posts/"+params.ByName("post")+".html"))
+	viewLib.Counter.RLock()
+	_, ok := viewLib.Counter.M[params.ByName("post")+".html"]
+	viewLib.Counter.RUnlock()
 
-	//ExecuteTemplate writes the template to w, writing "indexPage" as the main as defined
-	//in index.html, and with a data interface
-	err := tmpl.ExecuteTemplate(w, "wrapper", mock)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if ok == true {
+
+		tmpl := template.Must(template.ParseFiles("tmpl/wrapper.html", "posts/"+params.ByName("post")+".html"))
+
+		//ExecuteTemplate writes the template to w, writing "indexPage" as the main as defined
+		//in index.html, and with a data interface
+		err := tmpl.ExecuteTemplate(w, "wrapper", mock)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+	} else {
+		w.WriteHeader(404)
 	}
 
 }
 
 func handleRefresh(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	dir, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
+	refresh()
+}
 
-	files, _ := ioutil.ReadDir(dir + "/posts")
+func refresh() error {
+	dir, err := os.Getwd()
+
+	files, err := ioutil.ReadDir(dir + "/posts")
 
 	for _, f := range files {
-		fmt.Fprintln(w, f.Name())
+		fmt.Println(f.Name())
+		//check if in the view counter
+		viewLib.Counter.RLock()
+		_, ok := viewLib.Counter.M[f.Name()] //change to param
+		viewLib.Counter.RUnlock()
+
+		if ok == true {
+			fmt.Println(f.Name() + " is already present")
+		} else {
+			viewLib.Counter.Lock()
+			viewLib.Counter.M[f.Name()] = 0
+			viewLib.Counter.Unlock()
+			fmt.Println(f.Name() + " added to posts")
+		}
 	}
+	return err
+
+	//make the index page, need the date and post title to be shown in order
 }
 
 func testFiles(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
