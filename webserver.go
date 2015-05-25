@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -20,12 +21,14 @@ type Post struct {
 }
 
 func main() {
+	var addr = flag.String("addr", ":3000", "The port address of the application server")
+	flag.Parse()
 
 	fmt.Println("webserver started")
 
 	http.Handle("/", newRouter())
 	log.Println("Listening...")
-	log.Fatal(http.ListenAndServe(":3000", nil))
+	log.Fatal(http.ListenAndServe(*addr, nil))
 }
 
 func handlePost(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
