@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/Charlesworth/viewsLib"
 	"github.com/julienschmidt/httprouter"
@@ -23,6 +24,8 @@ type Post struct {
 func main() {
 	var addr = flag.String("addr", ":3000", "The port address of the application server")
 	flag.Parse()
+
+	refreshPosts()
 
 	fmt.Println("webserver started")
 
@@ -59,33 +62,40 @@ func handlePost(w http.ResponseWriter, r *http.Request, params httprouter.Params
 }
 
 func handleRefresh(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	refresh()
+	refreshPosts()
 }
 
-func refresh() error {
+func refreshPosts() {
 	dir, err := os.Getwd()
 
-	files, err := ioutil.ReadDir(dir + "/posts")
+	posts, err := ioutil.ReadDir(dir + "/posts")
 
-	for _, f := range files {
-		fmt.Println(f.Name())
-		//check if in the view counter
+	for _, post := range posts {
+		//check if the post is in the view counter
 		viewLib.Counter.RLock()
-		_, ok := viewLib.Counter.M[f.Name()] //change to param
+		_, postExists := viewLib.Counter.M[post.Name()]
 		viewLib.Counter.RUnlock()
 
-		if ok == true {
-			fmt.Println(f.Name() + " is already present")
+		if postExists == true {
+			fmt.Println(post.Name() + " is present")
 		} else {
 			viewLib.Counter.Lock()
-			viewLib.Counter.M[f.Name()] = 0
+			viewLib.Counter.M[post.Name()] = 0
 			viewLib.Counter.Unlock()
-			fmt.Println(f.Name() + " added to posts")
+			fmt.Println(post.Name() + " added to posts")
 		}
-	}
-	return err
 
-	//make the index page, need the date and post title to be shown in order
+		//fmt.Println(post.Name())
+		//add to a list of posts
+		name := strings.Split(post.Name(), "-")
+		fmt.Println(name[3:])
+	}
+
+	//make that list into the index page
+
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func testFiles(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
