@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/Charlesworth/viewsLib"
@@ -98,6 +99,9 @@ func refreshPosts() {
 				fmt.Print(name[i] + " ")
 			}
 		}
+
+		order, _ := strconv.Atoi(name[2] + name[1] + name[0])
+		fmt.Println(order)
 	}
 
 	//make that list into the index page
