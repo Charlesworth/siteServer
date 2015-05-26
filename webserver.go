@@ -53,12 +53,13 @@ func main() {
 
 func handlePost(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 
-	mock := Post{"Test Post", 20, 1}
+	mock := Post{"Test Post", 20, "1", 1}
 
 	//need to check if params.ByName("post") is in the list of posts and if not 404
-	ok := viewLib.PageExists(params.ByName("post") + ".html")
+	_, postExists := viewLib.GetPageViews(params.ByName("post") + ".html")
+	//ok := viewLib.PageExists(params.ByName("post") + ".html")
 
-	if ok == true {
+	if postExists == true {
 
 		tmpl := template.Must(template.ParseFiles("tmpl/wrapper.html", "posts/"+params.ByName("post")+".html"))
 
@@ -75,7 +76,6 @@ func handlePost(w http.ResponseWriter, r *http.Request, params httprouter.Params
 	} else {
 		w.WriteHeader(404)
 	}
-
 }
 
 func handleRefresh(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
@@ -84,47 +84,27 @@ func handleRefresh(w http.ResponseWriter, r *http.Request, params httprouter.Par
 
 func refreshPosts() {
 	dir, err := os.Getwd()
-
 	postsDir, err := ioutil.ReadDir(dir + "/posts")
 
 	var posts Posts
-
 	for _, post := range postsDir {
-		//check if the post is in the view counter
-		viewLib.Counter.RLock()
-		views, postExists := viewLib.Counter.M[post.Name()]
-		viewLib.Counter.RUnlock()
+		views, postExists := viewLib.GetPageViews(post.Name())
 
-		if postExists == true {
-			//fmt.Println(post.Name() + " is present")
-		} else {
-			viewLib.Counter.Lock()
-			viewLib.Counter.M[post.Name()] = 0
-			viewLib.Counter.Unlock()
-			//fmt.Println(post.Name() + " added to posts")
+		if postExists == false {
+			viewLib.AddPage(post.Name())
 		}
 
-		//fmt.Println(post.Name())
-		//add to a list of posts
 		name := strings.Split(post.Name(), "-")
-		fmt.Print(name[0], "/", name[1], "/", name[2], " ")
-		l := len(name) - 1
-		var fullName string
-		for i := 3; i <= l; i++ {
-			if i == l {
-				fullName = fullName + strings.Split(name[i], ".")[0]
-			} else {
-				fullName = fullName + name[i] + " "
-			}
+		order, _ := strconv.Atoi(name[2] + name[1] + name[0])
+		date := name[0] + "/" + name[1] + "/" + name[1]
+		fullName := strings.Split(name[len(name)-1], ".")[0]
+		for i := len(name) - 2; i >= 3; i-- {
+			fullName = name[i] + " " + fullName
 		}
 
-		order, _ := strconv.Atoi(name[2] + name[1] + name[0])
-		fmt.Println(order)
-		a := Post{fullName, views, order} //get the views from line 80
-		posts = append(posts, a)
+		posts = append(posts, Post{fullName, views, date, order})
 	}
 
-	//make that list into the index page
 	sort.Sort(posts)
 
 	for i := range posts {
@@ -138,7 +118,7 @@ func refreshPosts() {
 
 func testFiles(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 
-	mock := Post{"Test Post", 20, 1}
+	mock := Post{"Test Post", 20, "1", 1}
 
 	tmpl := template.Must(template.ParseFiles("tmpl/wrapper.html", "tmpl/post.html"))
 

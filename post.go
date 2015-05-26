@@ -4,7 +4,8 @@ package main
 type Post struct {
 	Name  string
 	Views int
-	Date  int
+	Date  string
+	Order int
 }
 
 //Posts blah blh
@@ -15,7 +16,7 @@ func (slice Posts) Len() int {
 }
 
 func (slice Posts) Less(i, j int) bool {
-	return slice[i].Date > slice[j].Date
+	return slice[i].Order > slice[j].Order
 }
 
 func (slice Posts) Swap(i, j int) {
