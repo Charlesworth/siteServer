@@ -19,6 +19,7 @@ import (
 type Post struct {
 	Title string
 	Views int
+	Date  int
 }
 
 func main() {
@@ -36,7 +37,7 @@ func main() {
 
 func handlePost(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 
-	mock := Post{"Test Post", 20}
+	mock := Post{"Test Post", 20, 1}
 	//need to check if params.ByName("post") is in the list of posts and if not 404
 
 	viewLib.Counter.RLock()
@@ -77,18 +78,26 @@ func refreshPosts() {
 		viewLib.Counter.RUnlock()
 
 		if postExists == true {
-			fmt.Println(post.Name() + " is present")
+			//fmt.Println(post.Name() + " is present")
 		} else {
 			viewLib.Counter.Lock()
 			viewLib.Counter.M[post.Name()] = 0
 			viewLib.Counter.Unlock()
-			fmt.Println(post.Name() + " added to posts")
+			//fmt.Println(post.Name() + " added to posts")
 		}
 
 		//fmt.Println(post.Name())
 		//add to a list of posts
 		name := strings.Split(post.Name(), "-")
-		fmt.Println(name[3:])
+		fmt.Print(name[0], "/", name[1], "/", name[2], " ")
+		l := len(name) - 1
+		for i := 3; i <= l; i++ {
+			if i == l {
+				fmt.Println(strings.Split(name[i], ".")[0])
+			} else {
+				fmt.Print(name[i] + " ")
+			}
+		}
 	}
 
 	//make that list into the index page
@@ -100,7 +109,7 @@ func refreshPosts() {
 
 func testFiles(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 
-	mock := Post{"Test Post", 20}
+	mock := Post{"Test Post", 20, 1}
 
 	tmpl := template.Must(template.ParseFiles("tmpl/wrapper.html", "tmpl/post.html"))
 
